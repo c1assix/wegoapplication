@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Name</key>
+		<string>Disco Saturday</string>
+		<key>Address</key>
+		<string>г. Минск, ул. Кальварийская, 1</string>
+		<key>Desription</key>
+		<string>Приглашаем Вас в субботу на вечеринку Disco Saturday. 
+Вы можете провести у нас в кафе незабываемый вечер!</string>
+		<key>Latitude</key>
+		<string>53.903246</string>
+		<key>Longitude</key>
+		<string>27.573407</string>
+		<key>Likes</key>
+		<string>20</string>
+		<key>Date</key>
+		<string>9 December</string>
+		<key>Time</key>
+		<string></string>
+		<key>Image</key>
+		<string>https://static.relax.by/images/common/afisha/logos/fb34d1c14eac6ae484135c06ae9ba63e.png</string>
+		<key>Price</key>
+		<string>Free</string>
+	</dict>
+	<dict>
+		<key>Name</key>
+		<string>Живая музыка в караоке «Plan B»</string>
+		<key>Date</key>
+		<string>9 December</string>
+		<key>Address</key>
+		<string> г. Минск, ул. Б. Хмельницкого, 10а</string>
+		<key>Desription</key>
+		<string>Окунитесь в прекрасную  атмосферу, наслаждаясь изысканной кухней под волнующую Вас музыку.  </string>
+		<key>Latitude</key>
+		<string>53.924502</string>
+		<key>Longitude</key>
+		<string>27.596241</string>
+		<key>Likes</key>
+		<string></string>
+		<key>Time</key>
+		<string></string>
+		<key>Price</key>
+		<string>Free</string>
+		<key>Image</key>
+		<string>https://static.relax.by/images/common/afisha/logos/3d2624f7cfc69b9f6efa5c7b858bc0d2.png</string>
+	</dict>
+	<dict>
+		<key>Name</key>
+		<string>Скалодром «Трапеция»</string>
+		<key>Address</key>
+		<string>г. Минск, пр-т Дзержинского, 91, эт. 2
+</string>
+		<key>Desription</key>
+		<string>Самый большой в Беларуси скалодром «Трапеция» - одновременно аттракцион для всей семьи.</string>
+		<key>Latitude</key>
+		<string>53.859646</string>
+		<key>Longitude</key>
+		<string>27.481978</string>
+		<key>Date</key>
+		<string></string>
+		<key>Likes</key>
+		<string></string>
+		<key>Time</key>
+		<string></string>
+		<key>Price</key>
+		<string>4 BYN</string>
+		<key>Image</key>
+		<string>https://static.relax.by/images/common/galleries/10500203/with_logo/ff3c99ea5589e67efddb7641f1ed0f4a.jpg</string>
+	</dict>
+	<dict>
+		<key>Name</key>
+		<string>Квесты «Ящик Пандоры»</string>
+		<key>Address</key>
+		<string>г. Минск, пр-т Независимости, 58
+</string>
+		<key>Desription</key>
+		<string>В «Ящике Пандоры» уже три разработанных квеста, которые как следует пощекочут ваши нервы и обеспечат работу адреналиновым рецепторам.</string>
+		<key>Latitude</key>
+		<string>53.917883</string>
+		<key>Longitude</key>
+		<string>27.589177</string>
+		<key>Date</key>
+		<string></string>
+		<key>Likes</key>
+		<string></string>
+		<key>Time</key>
+		<string></string>
+		<key>Price</key>
+		<string>45 BYN</string>
+		<key>Image</key>
+		<string>https://static.relax.by/images/common/galleries/10632795/4e0ecc9e48967ce9b7b9ee22c1e22dc8.jpg</string>
+	</dict>
+	<dict>
+		<key>Name</key>
+		<string>Боулинг-клуб «Титан»</string>
+		<key>Address</key>
+		<string>г. Минск, пр-т Дзержинского, 104
+</string>
+		<key>Desription</key>
+		<string>Боулинг - это прекрасная возможность весело провести время в компании друзей и с семьей. </string>
+		<key>Latitude</key>
+		<string>53.861867</string>
+		<key>Longitude</key>
+		<string>27.480358</string>
+		<key>Date</key>
+		<string></string>
+		<key>Likes</key>
+		<string></string>
+		<key>Time</key>
+		<string></string>
+		<key>Price</key>
+		<string>27 BYN</string>
+		<key>Image</key>
+		<string>https://static.relax.by/images/common/galleries/249610/b7e0e2e436143ad8d02155e6174eb6a7.jpg</string>
+	</dict>
+</array>
+</plist>
