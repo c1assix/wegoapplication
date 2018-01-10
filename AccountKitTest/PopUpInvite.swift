@@ -8,8 +8,6 @@
 
 import UIKit
 
-    var dateIndex = ""
-
 class PopUpInvite: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
 
     let dateValue = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
@@ -20,6 +18,7 @@ class PopUpInvite: UIViewController, UIPickerViewDataSource, UIPickerViewDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         inviteLabel.layer.cornerRadius = 10.0
+        inviteLabel.layer.masksToBounds = true
         // Do any additional setup after loading the view.
     }
 

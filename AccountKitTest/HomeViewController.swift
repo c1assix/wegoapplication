@@ -29,6 +29,8 @@ fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
     }
 }
 
+var accountIDGlobal = ""
+
 
 class HomeViewController: UIViewController {
     
@@ -37,6 +39,7 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var accountID: UILabel!
     @IBOutlet weak var typeLabel: UILabel!
     @IBOutlet weak var phoneOrEmailLabel: UILabel!
+    @IBOutlet weak var upgradeAccountOutlet: UIButton!
     
     var accountKit: AKFAccountKit!
 
@@ -52,6 +55,7 @@ class HomeViewController: UIViewController {
             
             accountKit.requestAccount({ (account, error) in
                 self.accountID.text = account?.accountID
+                accountIDGlobal = (account?.accountID)!
                 if account?.emailAddress?.characters.count > 0 {
                     //if the user is logged with Email
                     self.typeLabel.text = "Email Address"
@@ -59,10 +63,13 @@ class HomeViewController: UIViewController {
                 } else if account?.phoneNumber?.phoneNumber != nil {
                     self.typeLabel.text = "Phone Number"
                     self.phoneOrEmailLabel.text = account!.phoneNumber?.stringRepresentation()
-                    self.ref?.child(self.typeLabel.text!).childByAutoId().setValue("ID \(self.accountID.text!): \(self.phoneOrEmailLabel.text!)")
+                   self.ref?.child(self.typeLabel.text!).child("\(self.accountID.text!)").child("Phone").setValue("\(self.phoneOrEmailLabel.text!)")
                 }
             })
         }
+        
+        upgradeAccountOutlet.layer.borderWidth = 2
+        upgradeAccountOutlet.layer.borderColor = UIColor(red: 255.0/255.0, green: 153.0/255.0, blue: 0.0/255.0, alpha: 1.0).cgColor
         
     }
     
@@ -73,5 +80,12 @@ class HomeViewController: UIViewController {
         })
         //dismiss(animated: true, completion: nil)
     }
-
+    @IBAction func backButton(_ sender: UIButton) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func upgradeAccount(_ sender: UIButton) {
+        self.ref?.child(self.typeLabel.text!).child("\(self.accountID.text!)").child("Pro").setValue("true")
+        accountType = "true"
+    }
 }

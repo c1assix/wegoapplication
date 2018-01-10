@@ -8,23 +8,31 @@
 
 import UIKit
 import MapKit
-import FirebaseDatabase
 import Firebase
+import FirebaseDatabase
+import FirebaseStorage
+import UserNotifications
+import AccountKit
 
 var budgetIndex = ""
 var eventIndex = ""
 var nameLabelGlobal = ""
 var count = 0
+var budgetIndexFinish = "Free"
+var budgetIndexAdding = ""
+var dateIndex = "Monday"
+var urlForRating = ""
+var accountType = ""
 
-
-class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UNUserNotificationCenterDelegate {
     
-    var ref: DatabaseReference?
+    private let ref: DatabaseReference = Database.database().reference()
+    private let storage = Storage.storage().reference()
     var latitude: String?
     var longitude: String?
-    var rating: String?
+    var rating = 0
     var urlInfo: String?
-
+    var mapItem = MKMapItem()
     
     var randomedIndex = 0
 
@@ -45,21 +53,17 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     @IBOutlet weak var budgetOutlet: UIButton!
     @IBOutlet weak var addressLabel: UILabel!
     @IBOutlet weak var imageLabel: UIImageView!
-    @IBOutlet weak var viewWithButtons: UIView!
     @IBOutlet weak var mapKitView: MKMapView!
     @IBOutlet weak var inviteButton: UIButton!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var labelPrice: UILabel!
-    @IBOutlet weak var tapMeLabel: UILabel!
+    @IBOutlet weak var infoLabel: UIButton!
+    @IBOutlet weak var dateOutlet: UIButton!
+    @IBOutlet weak var addEventOutlet: UIButton!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        ref = Database.database().reference()
-        
-        //filePath = Bundle.main.path(forResource: "places", ofType: "plist")
-        //items = NSArray(contentsOfFile: filePath!) as! [[String : AnyObject]]
         
         styleCardDefault()
         styleController(outlet: eventTypeOutlet)
@@ -73,20 +77,15 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
         mapKitView.showsPointsOfInterest = true
         locationManager.requestAlwaysAuthorization()
         locationManager.requestWhenInUseAuthorization()
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (didAllow, error) in
+        }
+        UNUserNotificationCenter.current().delegate = self
         mapKitView.showsCompass = false
-        
+        infoLabel.isHidden = true
         inviteButton.isHidden = true
         
-        // Do any additional setup after loading the view.
-        ref?.observe(.value, with: { (snapshot: DataSnapshot!) in
-            count = count + Int(snapshot.childrenCount)
-        })
-        //-------------------------
     }
-    
-//    override var preferredStatusBarStyle: UIStatusBarStyle {
-//        return .lightContent
-//    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -101,10 +100,9 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     
     func styleController(outlet: UIButton) {
-        viewWithButtons.layer.cornerRadius = 0
-        viewWithButtons.layer.shadowColor = blueShadow.cgColor
-        viewWithButtons.layer.shadowOpacity = 1
-        viewWithButtons.layer.shadowOffset = CGSize.zero
+        buttonSetStyle(outlet: dateOutlet)
+        buttonSetStyle(outlet: budgetOutlet)
+        buttonSetStyle(outlet: eventTypeOutlet)
         inviteButton.layer.cornerRadius = 0.5 * inviteButton.bounds.height
         inviteButton.layer.shadowColor = redShadow.cgColor
         inviteButton.layer.shadowOpacity = 1
@@ -120,57 +118,43 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     
     func styleCardDefault(){
-        nameLabel.text = ""
-        nameLabel.layer.backgroundColor = grayColor.cgColor
-        addressLabel.text = ""
-        addressLabel.layer.backgroundColor = grayColor.cgColor
-        labelPrice.text = ""
-        descriptionLabel.text = ""
-        descriptionLabel.layer.backgroundColor = grayColor.cgColor
-        labelPrice.layer.backgroundColor = grayColor.cgColor
-        addressLabel.layer.backgroundColor = grayColor.cgColor
-
+        cardView.isHidden = true
     }
     
     func setCardInfo(index: Int){
+        cardView.isHidden = false
+        infoLabel.isHidden = false
         settingAnnotation()
+        
         settingInfo(key: "name", label: nameLabel)
         settingInfo(key: "description", label: descriptionLabel)
         settingInfo(key: "address", label: addressLabel)
         settingInfo(key: "price", label: labelPrice)
         settingInfoUrl(key: "url")
-        loadImage()
-        nameLabel.layer.backgroundColor = UIColor.white.cgColor
-        addressLabel.layer.backgroundColor = UIColor.white.cgColor
-        addressLabel.layer.backgroundColor = UIColor.white.cgColor
-        descriptionLabel.layer.backgroundColor = UIColor.white.cgColor
-        labelPrice.layer.backgroundColor = UIColor.white.cgColor
-        addressLabel.layer.backgroundColor = UIColor.white.cgColor
-        tapMeLabel.isHidden = true
+        
+        newLoadImage()
+        
         nameLabelGlobal = nameLabel.text!
     }
     
     //Invite Friends Action
     
     @IBAction func inviteAction(_ sender: UIButton) {
-        let activityVC = UIActivityViewController(activityItems: ["Hi! Let's go to \(nameLabelGlobal)!\nAddress: \(addressLabel.text!)\nDate: \(dateIndex)\nPrice: \(labelPrice.text!)\n\nSended from WeGo! App"], applicationActivities: nil)
+        
+        let activityVC = UIActivityViewController(activityItems: ["Hi! Let's go to \(nameLabel.text!)!\nAddress: \(addressLabel.text!)\nDate: \(dateIndex)\nPrice: \(labelPrice.text!)\n\nSent from WeGo! App"], applicationActivities: nil)
         activityVC.popoverPresentationController?.sourceView = self.view
         self.present(activityVC, animated: true, completion: nil)
         
-        ref?.child("places").child("\(randomedIndex)").child("rating").observeSingleEvent(of: .value, with: { (snapshot) in
-            if let currentRating = snapshot.value as? String{
-                self.rating = currentRating
-                self.run(after: 1){
-                self.ref?.child("places").child("\(self.randomedIndex)").child("rating").setValue("\(Int(self.rating!)! + 1)")
-                }
-            }
-        })
+
+        urlForRating = "places/\(budgetIndexFinish)/\(dateIndex)/\(randomedIndex)/rating"
+        callNotification()
+        
     }
     //Invite Friends Action
     
     //Download Image
     func loadImage(){
-        ref?.child("places").child("\(randomedIndex)").child("image").observeSingleEvent(of: .value, with: { (snapshot) in
+        ref.child("places").child("\(budgetIndexFinish)").child("\(randomedIndex)").child("image").observeSingleEvent(of: .value, with: { (snapshot) in
             if let item = snapshot.value as? String{
                 let imageUrlString = item
                 let imageUrl:URL = URL(string: imageUrlString )!
@@ -191,34 +175,58 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
             }
         })
     }
+    
+    func newLoadImage(){
+       // DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let tempImageRef = self.storage.child("Places/\(self.nameLabel.text!).jpg")
+                tempImageRef.getData(maxSize: 1 * 1000 * 1000) { (data, error) in
+                       if error == nil{
+                        DispatchQueue.main.async {
+                            self.imageLabel.image = UIImage(data: data!)
+                        }
+                        }else{
+                          print("Error")
+                       }
+                    }
+          //  }
+        }
         //Download Image
     
     //Setting annotation
-    func settingAnnotation(){
-        ref?.child("places").child("\(randomedIndex)").child("latitude").observeSingleEvent(of: .value, with: { (snapshot) in
-            if let latitudeConst = snapshot.value{
-                self.latitude = latitudeConst as? String
+    func settingAnnotation() {
+        let dispatchGroup = DispatchGroup() // Создаем группу
+        
+        dispatchGroup.enter() // Закидываем таск
+        ref.child("places/\(budgetIndexFinish)/\(dateIndex)/\(randomedIndex)/latitude").observeSingleEvent(of: .value, with: { (snapshot) in
+            if let latitudeConst = snapshot.value as? String {
+                self.latitude = latitudeConst
             }
+            dispatchGroup.leave() // Ливаем из группы после выполнения
         })
-        ref?.child("places").child("\(randomedIndex)").child("longitude").observeSingleEvent(of: .value, with: { (snapshot) in
-            if let longitudeConst = snapshot.value as? String{
+        
+        dispatchGroup.enter() // Закидываем второй таск
+        ref.child("places/\(budgetIndexFinish)/\(dateIndex)/\(randomedIndex)/longitude").observeSingleEvent(of: .value, with: { (snapshot) in
+            if let longitudeConst = snapshot.value as? String {
                 self.longitude = longitudeConst
             }
+            dispatchGroup.leave() // Ливаем после выполнения
         })
-       run(after: 1){
-            if self.latitude != nil && self.longitude != nil{
-                let location : CLLocationCoordinate2D = CLLocationCoordinate2DMake(Double(self.latitude!)!, Double(self.longitude!)!)
-                let region : MKCoordinateRegion = MKCoordinateRegionMake(location, self.span)
+        
+        dispatchGroup.notify(queue: .main) { // Говорим, что группа пустая и моэно выполнять дальше
+            if let latitude = self.latitude, let longitude = self.longitude {
+                let location = CLLocationCoordinate2DMake(Double(latitude)!, Double(longitude)!)
+                let region = MKCoordinateRegionMake(location, self.span)
                 self.mapKitView.setRegion(region, animated: true)
                 self.mapKitView.removeAnnotation(self.annotation)
                 self.annotation.coordinate = location
                 self.mapKitView.addAnnotation(self.annotation)
+                print(latitude)
             }
         }
     }
     
     func settingInfo(key: String, label: UILabel){
-        ref?.child("places").child("\(randomedIndex)").child("\(key)").observeSingleEvent(of: .value, with: { (snapshot) in
+        ref.child("places").child("\(budgetIndexFinish)").child("\(dateIndex)").child("\(randomedIndex)").child("\(key)").observeSingleEvent(of: .value, with: { (snapshot) in
             if let item = snapshot.value as? String{
                 label.text = item
             }
@@ -226,12 +234,24 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     
     func settingInfoUrl(key: String){
-        ref?.child("places").child("\(randomedIndex)").child("\(key)").observeSingleEvent(of: .value, with: { (snapshot) in
+        ref.child("places").child("\(budgetIndexFinish)").child("\(dateIndex)").child("\(randomedIndex)").child("\(key)").observeSingleEvent(of: .value, with: { (snapshot) in
             if let item = snapshot.value as? String{
                 self.urlInfo = item
             }
         })
     }
+    
+    func accountCheck(){
+        ref.child("Phone Number/\(accountIDGlobal)/Pro").observeSingleEvent(of: .value, with: { (snapshot) in
+            if let status = snapshot.value as? String{
+                accountType = status
+            }
+        })
+        if accountType == "true"{
+            addEventOutlet.isHidden = false
+        }
+    }
+    
     
     func run(after seconds: Int, completion: @escaping () -> Void) {
         let deadline = DispatchTime.now() + .seconds(seconds)
@@ -241,8 +261,61 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     }
     
     @IBAction func infoButton(_ sender: UIButton) {
-        UIApplication.shared.openURL(NSURL(string: urlInfo!)! as URL)
+        UIApplication.shared.open(URL(string: urlInfo!)!, options: [:], completionHandler: nil)
     }
+    
+    func buttonSetStyle(outlet: UIButton){
+        outlet.layer.cornerRadius = 0.5 * eventTypeOutlet.bounds.height
+        outlet.layer.shadowColor = blueShadow.cgColor
+        outlet.layer.shadowOpacity = 1
+        outlet.layer.shadowOffset = CGSize.zero
+        outlet.layer.shadowRadius = 10
+    }
+    
+    func callNotification(){
+        
+        let like = UNNotificationAction(identifier: "like", title: "Like 👍", options: UNNotificationActionOptions.foreground)
+        let dislike = UNNotificationAction(identifier: "dislike", title: "Dislike 👎", options: UNNotificationActionOptions.foreground)
+        let fake = UNNotificationAction(identifier: "fake", title: "Fake event", options: UNNotificationActionOptions.foreground)
+        
+        let category = UNNotificationCategory(identifier: "directCategory", actions: [like, dislike, fake], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Rate event!"
+        content.subtitle = "Recently you were at the event."
+        content.body = "Event: \(nameLabel.text!)"
+        content.categoryIdentifier = "directCategory"
+        content.badge = 1
+        
+        let triggerNotify = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+        let requestNotify = UNNotificationRequest(identifier: "Notify", content: content, trigger: triggerNotify)
+        
+        UNUserNotificationCenter.current().add(requestNotify, withCompletionHandler: nil)
+        
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.actionIdentifier == "like" {
+            ref.child("\(urlForRating)").observeSingleEvent(of: .value, with: { (snapshot) in
+                if let rating = snapshot.value as? String {
+                    self.ref.child("\(urlForRating)").setValue("\(Int(rating)! + 1)")
+                }
+            })
+        } else if response.actionIdentifier == "dislike" {
+            if response.actionIdentifier == "like" {
+                ref.child("\(urlForRating)").observeSingleEvent(of: .value, with: { (snapshot) in
+                    if let rating = snapshot.value as? String {
+                        self.ref.child("\(urlForRating)").setValue("\(Int(rating)! - 1)")
+                    }
+                })
+            }
+        }
+        
+    }
+    
+    
+    
     
     //Setting annotation
     
@@ -258,3 +331,4 @@ class MainViewController: UIViewController, MKMapViewDelegate, CLLocationManager
     */
 
 }
+

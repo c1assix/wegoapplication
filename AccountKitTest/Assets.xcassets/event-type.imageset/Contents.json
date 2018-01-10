@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "icon-event-gray.png",
+      "filename" : "party.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icon-event-gray@2x.png",
+      "filename" : "party@3x copy.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icon-event-gray@3x.png",
+      "filename" : "party@3x.png",
       "scale" : "3x"
     }
   ],

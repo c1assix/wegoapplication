@@ -9,6 +9,9 @@
 import UIKit
 import AccountKit
 
+var accountID = ""
+
+
 class LoginViewController: UIViewController, AKFViewControllerDelegate {
     
     var accountKit: AKFAccountKit!
@@ -20,7 +23,6 @@ class LoginViewController: UIViewController, AKFViewControllerDelegate {
         super.viewDidLoad()
         
         buttonStyle()
-        gradiented()
         //Init Account Kit
         if accountKit == nil {
             self.accountKit = AKFAccountKit(responseType: .accessToken)
@@ -32,12 +34,10 @@ class LoginViewController: UIViewController, AKFViewControllerDelegate {
         super.viewWillAppear(animated)
         
         if (accountKit.currentAccessToken != nil) {
-            print("User already logged in, go to the home screen")
             DispatchQueue.main.async(execute: {
                 self.performSegue(withIdentifier: "ShowHome", sender: self)
             })
         }
-        
     }
     
     func prepareLoginViewController(_ loginViewController: AKFViewController) {
@@ -83,16 +83,5 @@ class LoginViewController: UIViewController, AKFViewControllerDelegate {
         loginWithPhoneOutlet.layer.cornerRadius = 0.5 * loginWithEmailOutlet.bounds.size.height
     }
     
-    func gradiented() {
-        let gradient: CAGradientLayer = CAGradientLayer()
-        let colorTop = UIColor(red: 112.0/255.0, green: 219.0/255.0, blue: 155.0/255.0, alpha: 1.0).cgColor
-        let colorBottom = UIColor(red: 86.0/255.0, green: 197.0/255.0, blue: 238.0/255.0, alpha: 1.0).cgColor
-        gradient.colors = [colorTop, colorBottom]
-        gradient.startPoint = CGPoint(x: 0.0, y: 0.5)
-        gradient.endPoint = CGPoint(x: 1.0, y: 0.5)
-        gradient.frame = loginWithPhoneOutlet.bounds
-        gradient.cornerRadius = 5
-        loginWithPhoneOutlet.clipsToBounds = true
-    }
 
 }
